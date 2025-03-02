@@ -31,3 +31,6 @@ build/
 # Logs
 logs/
 *.log
+
+/find_files.ipynb
+/requirements.txt
