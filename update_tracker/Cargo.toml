@@ -1,0 +1,7 @@
+[package]
+name = "update_tracker"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+notify = "8.0.0"
