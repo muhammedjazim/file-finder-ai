@@ -8,7 +8,22 @@ fn main() -> Result<()> {
             Ok(event) => {
                 // Skip events from AppData directory
                 if let Some(path_str) = event.paths.first().and_then(|p| p.to_str()) {
-                    if !path_str.contains("\\AppData\\") {
+                    // Define patterns to exclude
+                    
+                    let exclude_patterns = [
+                        "\\AppData\\",
+                        "\\.git",
+                        "\\node_modules",
+                        "\\.vscode",
+                        "\\target",
+                        "\\.vs",
+                        "\\bin",
+                        "\\obj",
+                        "\\build",
+                        "\\dist"
+                    ];
+                    
+                    if !exclude_patterns.iter().any(|&pattern| path_str.contains(pattern)) {
                         println!("event: {:?}", event);
                     }
                 } else {
