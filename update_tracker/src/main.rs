@@ -7,8 +7,6 @@ use rusqlite::{params, Connection, Result as SqlResult};
 struct FileEvent {
     event_kind: String,
     path: String,
-    rename_from: Option<String>,
-    rename_to: Option<String>,
 }
 
 fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
@@ -19,9 +17,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 event_kind TEXT NOT NULL,
-                path TEXT NOT NULL,
-                rename_from TEXT,
-                rename_to TEXT
+                path TEXT NOT NULL
             )",
         [],
     )?;
@@ -45,18 +41,30 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
                     ];
                     
                     if !exclude_patterns.iter().any(|&pattern| path_str.contains(pattern)) {
-                        match event.kind {
+                        let file_event = match event.kind {
                             EventKind::Create(_) => {
-                                println!("create event");
+                                println!("create event: {}", path_str);
+                                Some(FileEvent {
+                                    event_kind: "create".to_string(),
+                                    path: path_str.to_string(),
+                                })
                             }
                             EventKind::Remove(_) => {
-                                println!("delete event");
+                                println!("delete event: {}", path_str);
+                                Some(FileEvent {
+                                    event_kind: "delete".to_string(),
+                                    path: path_str.to_string(),
+                                })
                             }
                             EventKind::Modify(notify::event::ModifyKind::Name(_)) => {
-                                println!("modified name");
+                                println!("modified name: {}", path_str);
+                                Some(FileEvent { 
+                                    event_kind: "rename".to_string(),
+                                    path: path_str.to_string()
+                                })
                             }
-                            _ => {}
-                        }
+                            _ => None
+                        };
                     }
                 } else {
                     println!("else statement")
