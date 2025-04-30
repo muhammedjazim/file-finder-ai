@@ -32,5 +32,12 @@ build/
 logs/
 *.log
 
-/find_files.ipynb
+*.ipynb
 /requirements.txt
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+target/
+sqlx-data.json

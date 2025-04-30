@@ -6,4 +6,4 @@ edition = "2021"
 [dependencies]
 notify = "8.0.0"
 dotenvy = "0.15"
-sqlx = "0.8.5"
+rusqlite = { version = "0.35.0", features = ["bundled"] }
