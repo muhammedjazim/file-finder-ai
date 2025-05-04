@@ -7,3 +7,5 @@ edition = "2021"
 notify = "8.0.0"
 dotenvy = "0.15"
 rusqlite = { version = "0.35.0", features = ["bundled"] }
+directories = "6.0.0"
+helper_library = { path = "../helper_library" }

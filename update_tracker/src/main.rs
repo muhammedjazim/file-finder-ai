@@ -1,27 +1,18 @@
 use notify::{Error, Event, EventKind, RecursiveMode, Watcher};
 use std::path::Path;
 use std::env;
-use rusqlite::{params, Connection, Result as SqlResult};
+use rusqlite::{params, Connection};
 use std::sync::{Arc, Mutex};
 use notify::event::RenameMode;
-
-#[derive(Debug)]
-struct FileEvent {
-    event_kind: String,
-    path: String,
-    extension: String
-}
-
-fn get_file_extension(path: &str) -> String {
-    Path::new(path)
-        .extension()
-        .and_then(|ext| ext.to_str())
-        .unwrap_or("")
-        .to_string()
-}
+use helper_library::{utils, file_event};
 
 fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
-    let conn = Connection::open("file_index.db")?;
+    let data_dir = utils::get_app_data_dir();
+    let db_path = data_dir.join("file_index.db");
+    
+    println!("Database path: {}", db_path.display());
+    
+    let conn = Connection::open(&db_path)?;
 
     conn.execute(
         "create table if not exists file_index (
@@ -101,13 +92,13 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
                         "sys", "ini"
                     ];
 
-                    let extension = get_file_extension(path_str);
+                    let extension = utils::get_file_extension(path_str);
                     
                     if !exclude_patterns.iter().any(|&pattern| path_str.contains(pattern)) && !ignored_extensions.contains(&extension.as_str()){
                         let file_event = match event.kind {
                             EventKind::Create(_) => {
                                 println!("create event: {}", path_str);
-                                Some(FileEvent {
+                                Some(file_event::FileEvent {
                                     event_kind: "create".to_string(),
                                     path: path_str.to_string(),
                                     extension
@@ -115,7 +106,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
                             }
                             EventKind::Remove(_) => {
                                 println!("delete event: {}", path_str);
-                                Some(FileEvent {
+                                Some(file_event::FileEvent {
                                     event_kind: "delete".to_string(),
                                     path: path_str.to_string(),
                                     extension
@@ -125,19 +116,19 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
                                 match rename_mode {
                                     RenameMode::From => {
                                         println!("rename from: {}", path_str);
-                                        Some(FileEvent { event_kind: "rename_from".to_string(), path: path_str.to_string(), extension })
+                                        Some(file_event::FileEvent { event_kind: "rename_from".to_string(), path: path_str.to_string(), extension })
                                     }
                                     RenameMode::To => {
                                         println!("rename to: {}", path_str);
-                                        Some(FileEvent { event_kind: "rename_to".to_string(), path: path_str.to_string(), extension })
+                                        Some(file_event::FileEvent { event_kind: "rename_to".to_string(), path: path_str.to_string(), extension })
                                     }
                                     RenameMode::Both => {
                                         println!("rename both: {}", path_str);
-                                        Some(FileEvent { event_kind: "rename_both".to_string(), path: path_str.to_string(), extension })
+                                        Some(file_event::FileEvent { event_kind: "rename_both".to_string(), path: path_str.to_string(), extension })
                                     }
                                     _ => {
                                         println!("unspecified");
-                                        Some(FileEvent { 
+                                        Some(file_event::FileEvent { 
                                             event_kind: "rename".to_string(),
                                             path: path_str.to_string(),
                                             extension

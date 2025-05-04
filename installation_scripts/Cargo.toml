@@ -1,0 +1,9 @@
+[package]
+name = "installation_scripts"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+directories = "6.0.0"
+helper_library = { path = "../helper_library" }
+rusqlite = "0.35.0"
